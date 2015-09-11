@@ -1,9 +1,9 @@
 <div>
 	<h1>Scope vs Controller</h1>
 
-	<div class="row">
+	<div class="row" ng-controller="ScopeController">
 		<div class="col-md-6">
-			<div ng-controller="ScopeController">
+			<div>
 				<div class="alert" ng-class="{'alert-warning': clickCount < 5, 'alert-success': clickCount >= 5 }" role="alert">{{ message }}</div>
 
 				<button type="button" class="btn btn-primary" ng-click="addClick()">
@@ -15,10 +15,10 @@
 		<div class="col-md-6">
 			<div bs-tabs>
 				<div title="controller.js" name="controller.js" bs-pane>
-					<div hljs no-escape>
+					<div hljs no-escape compile="true">
 angular.module('scopeVsController').controller('ScopeController', function($scope) {
-  $scope.clickCount = 0;
-  $scope.message  = '';
+  $scope.clickCount = {{clickCount}};
+  $scope.message  = '{{message}}';
 
   $scope.addClick = function() {
   	$scope.clickCount++;
@@ -31,7 +31,7 @@ angular.module('scopeVsController').controller('ScopeController', function($scop
 					</div>
 				</div>
 				<div title="template.html" name="template.html" bs-pane>
-					<div hljs>
+					<div hljs compile="true">
 <div ng-controller="ScopeController">
   <div class="alert" ng-class="{'alert-warning': clickCount < 5, 'alert-success': clickCount >= 5 }" role="alert">{{ message }}</div>
 
