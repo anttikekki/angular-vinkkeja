@@ -1,4 +1,10 @@
-angular.module('presentationApp', ['ngRoute']).config(function($routeProvider) {
+angular.module('presentationApp', [
+	'ngRoute',
+	'hljs',
+	'mgcrea.ngStrap',
+	'scopeVsController'
+	])
+.config(function($routeProvider) {
   $routeProvider
     .when('/', {
       templateUrl:'templates/frontpage/frontpage.html'
@@ -9,4 +15,4 @@ angular.module('presentationApp', ['ngRoute']).config(function($routeProvider) {
     .otherwise({
       redirectTo:'/'
     });
-})
+});
