@@ -1,0 +1,254 @@
+<div ng-controller="ScopenPeriytyminenController">
+	<h1>Scopen periytymisen vaarat</h1>
+
+	<p>Scopen muuttujien periytyminen on eritäin monimutkainen kokonaisuus pääasiassa siksi että sen kanssa tekee helposti huomaamattomia virheitä. Lisäksi koodista tulee vaikeaselkoista koska kaikkia käytettyjä muuttujia ei alusteta samassa scopessa.</p>
+
+
+
+	<h3>Muuttujien periytyminen</h3>
+
+	<p ng-hide="showDoc1"><a href="" ng-click="showDoc1 = true">Näytä perustelu</a></p>
+	<p ng-show="showDoc1">Primitiivien (String, Number, Boolean) muokkaus ei muokkaa olemassaolevaa arvoa vaan luo siitä uuden. Tällöin primitiivien muokkaus ala-scopessa luo ala-scopeen vastaavan muuttujan eikä ylä-scopen saman nimiselllä muuttujalla enää ole vaikutusta.</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div ng-controller="MuuttujatParentDemoController">
+				<form>
+					<div class="form-group">
+						<label for="name1">Isännän nimi muuttujassa <code>name</code></label>
+						<input type="text" class="form-control" id="name1" placeholder="Nimi" ng-model="name">
+					</div>
+					<div class="form-group">
+						<label for="name2">Isännän nimi olion sisällä <code>user.name</code></label>
+						<input type="text" class="form-control" id="name2" placeholder="Nimi" ng-model="user.name">
+					</div>
+				</form>
+
+				<div ng-controller="MuuttujatChildDemoController">
+					<form>
+						<div class="form-group">
+							<label for="name3">Lapsen nimi muuttujassa <code>name</code></label>
+							<input type="text" class="form-control" id="name3" placeholder="Nimi" ng-model="name">
+						</div>
+						<div class="form-group">
+							<label for="name4">Lapsen nimi olion sisällä <code>user.name</code></label>
+							<input type="text" class="form-control" id="name4" placeholder="Nimi" ng-model="user.name">
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('scopenPeriytyminen')
+.controller('MuuttujatParentDemoController', function($scope) {
+  $scope.name = '';
+  $scope.user = {
+  	name: ''
+  };
+})
+.controller('MuuttujatChildDemoController', function($scope) {
+  
+})
+					</div>
+				</div>
+				<div title="template.html" name="template.html" bs-pane>
+					<div hljs>
+<div ng-controller="MuuttujatParentDemoController">
+  <form>
+    <div class="form-group">
+      <label for="name1">Isännän nimi muuttujassa <code>name</code></label>
+      <input type="text" class="form-control" id="name1" placeholder="Nimi" ng-model="name">
+    </div>
+    <div class="form-group">
+      <label for="name2">Isännän nimi olion sisällä <code>user.name</code></label>
+      <input type="text" class="form-control" id="name2" placeholder="Nimi" ng-model="user.name">
+    </div>
+  </form>
+
+  <div ng-controller="MuuttujatChildDemoController">
+    <form>
+      <div class="form-group">
+        <label for="name3">Lapsen nimi muuttujassa <code>name</code></label>
+        <input type="text" class="form-control" id="name3" placeholder="Nimi" ng-model="name">
+      </div>
+      <div class="form-group">
+        <label for="name4">Lapsen nimi olion sisällä <code>user.name</code></label>
+        <input type="text" class="form-control" id="name4" placeholder="Nimi" ng-model="user.name">
+      </div>
+    </form>
+  </div>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+
+
+
+	<h3>Funktioiden periytyminen</h3>
+
+	<p ng-hide="showDoc2"><a href="" ng-click="showDoc2 = true">Näytä perustelu</a></p>
+	<p ng-show="showDoc2">Ala-scope käyttää ylä-scopen funktioita. Vain scopen muuttujat ovat näkyvillä templatelle koska <code>controller as</code> ei ole käytössä. <code>doIt = action</code> luo <code>doIt</code> muuttujan ala-scopeen.</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div class="well">Viesti: {{ doItMessage }}</div>
+			<div ng-controller="FunctiotParentDemoController">
+				<p>
+					<button type="button" class="btn btn-primary" ng-click="doIt()">Isännän doIt()</button>
+				</p>
+				<div ng-controller="FunctiotChildDemoController">
+					<p>
+						<button type="button" class="btn btn-primary" ng-click="doIt()">Lapsen doIt()</button>
+						<button type="button" class="btn btn-primary" ng-click="doIt = action">doIt = action</button>
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('scopenPeriytyminen')
+.controller('FunctiotParentDemoController', function($scope) {
+  $scope.doIt = function() {
+  	$scope.$emit('doItMessage', 'parent $scope.doIt()');
+  };
+})
+.controller('FunctiotChildDemoController', function($scope) {
+  $scope.action = function() {
+  	$scope.$emit('doItMessage', 'child $scope.action()');
+  };
+
+  this.doIt = function() {
+  	$scope.$emit('doItMessage', 'child this.doIt()');
+  };
+
+  var doIt = function() {
+  	$scope.$emit('doItMessage', 'child var doIt()');
+  };
+
+  function doIt() {
+  	$scope.$emit('doItMessage', 'child function doIt()');
+  }
+});
+					</div>
+				</div>
+				<div title="template.html" name="template.html" bs-pane>
+					<div hljs>
+<div ng-controller="FunctiotParentDemoController">
+  <p>
+    <button type="button" class="btn btn-primary" ng-click="doIt()">Isännän doIt()</button>
+  </p>
+  <div ng-controller="FunctiotChildDemoController">
+    <p>
+      <button type="button" class="btn btn-primary" ng-click="doIt()">Lapsen doIt()</button>
+      <button type="button" class="btn btn-primary" ng-click="doIt = action">doIt = action</button>
+    </p>
+  </div>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+
+
+
+	<h3>ng-if ja ng-repeat scope</h3>
+
+	<p ng-hide="showDoc3"><a href="" ng-click="showDoc3 = true">Näytä perustelu</a></p>
+	<p ng-show="showDoc3"><code>ng-if</code> ja <code>ng-repeat</code> luovat oman ala-scopen joten ala-scopen primitiivien muokkaus ei näy ylä-scopessa.</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div ng-controller="NgIfNgRepeatDemoController">
+				<form>
+					<div class="form-group">
+						<label for="name1">Nimi muuttujassa <code>name</code></label>
+						<input type="text" class="form-control" id="name1" placeholder="Nimi" ng-model="name">
+					</div>
+				</form>
+				<div ng-if="true">
+					<form>
+						<div class="form-group">
+							<label for="name2">Nimi muuttujassa <code>name</code> <code>ng-if</code>:n sisällä</label>
+							<input type="text" class="form-control" id="name2" placeholder="Nimi" ng-model="name">
+						</div>
+					</form>
+				</div>
+				<div ng-repeat="i in [1]">
+					<form>
+						<div class="form-group">
+							<label for="name3">Nimi muuttujassa <code>name</code> <code>ng-repeat</code>:n sisällä</label>
+							<input type="text" class="form-control" id="name3" placeholder="Nimi" ng-model="name">
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('scopenPeriytyminen')
+.controller('NgIfNgRepeatDemoController', function($scope) {
+  $scope.name = '';
+})
+					</div>
+				</div>
+				<div title="template.html" name="template.html" bs-pane>
+					<div hljs>
+<div ng-controller="NgIfNgRepeatDemoController">
+  <form>
+    <div class="form-group">
+      <label for="name1">Nimi muuttujassa <code>name</code></label>
+      <input type="text" class="form-control" id="name1" placeholder="Nimi" ng-model="name">
+    </div>
+  </form>
+  <div ng-if="true">
+    <form>
+      <div class="form-group">
+        <label for="name2">Nimi muuttujassa <code>name</code> <code>ng-if</code>:n sisällä</label>
+        <input type="text" class="form-control" id="name2" placeholder="Nimi" ng-model="name">
+      </div>
+    </form>
+  </div>
+  <div ng-repeat="i in [1]">
+    <form>
+      <div class="form-group">
+        <label for="name3">Nimi muuttujassa <code>name</code> <code>ng-repeat</code>:n sisällä</label>
+        <input type="text" class="form-control" id="name3" placeholder="Nimi" ng-model="name">
+      </div>
+    </form>
+  </div>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+	
+</div>

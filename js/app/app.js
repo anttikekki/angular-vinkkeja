@@ -1,8 +1,12 @@
 angular.module('presentationApp', [
+	//Libs
 	'ngRoute',
 	'hljs',
 	'mgcrea.ngStrap',
-	'scopeVsController'
+
+	//Content
+	'scopeVsController',
+	'scopenPeriytyminen'
 	])
 .config(function($routeProvider) {
   $routeProvider
@@ -11,6 +15,9 @@ angular.module('presentationApp', [
     })
     .when('/scopeVsController', {
       templateUrl:'templates/scopeVsController/scopeVsController.html'
+    })
+    .when('/scopenPeriytyminen', {
+      templateUrl:'templates/scopenPeriytyminen/scopenPeriytyminen.html'
     })
     .otherwise({
       redirectTo:'/'
