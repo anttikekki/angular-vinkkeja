@@ -9,8 +9,8 @@ angular.module('presentationApp', [
     .when('/', {
       templateUrl:'templates/frontpage/frontpage.html'
     })
-    .when('/scopeVsController/1', {
-      templateUrl:'templates/scopeVsController/scopeVsController1.html'
+    .when('/scopeVsController', {
+      templateUrl:'templates/scopeVsController/scopeVsController.html'
     })
     .otherwise({
       redirectTo:'/'

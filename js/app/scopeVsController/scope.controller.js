@@ -8,5 +8,8 @@ angular.module('scopeVsController').controller('ScopeController', function($scop
 
   $scope.$watch('clickCount', function(newValue) {
   	$scope.message = newValue < 5 ? 'Alle viisi klikkausta' : 'Viisi tai enemmän klikkausta';
+  	if(newValue >= 5) {
+  		$scope.$emit('ScopeController.fiveClicksOK');
+  	}
   });
 });
