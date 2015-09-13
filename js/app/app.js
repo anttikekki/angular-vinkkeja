@@ -7,9 +7,10 @@ angular.module('presentationApp', [
 	//Content
 	'scopeVsController',
 	'scopenPeriytyminen',
-	'directiveAsComponent'
+	'directiveAsComponent',
+	'kuuntelijat'
 	])
-.config(function($routeProvider) {
+.config(function($routeProvider, $httpProvider) {
   $routeProvider
     .when('/', {
       templateUrl:'templates/frontpage/frontpage.html'
@@ -23,7 +24,27 @@ angular.module('presentationApp', [
     .when('/directiveAsComponent', {
       templateUrl:'templates/directiveAsComponent/directiveAsComponent.html'
     })
+    .when('/kuuntelijat', {
+      templateUrl:'templates/kuuntelijat/kuuntelijat.html'
+    })
     .otherwise({
       redirectTo:'/'
     });
+
+    $httpProvider.interceptors.push(function($q, $timeout) {
+	  return {
+	    response: function(response) {
+	      if(response.config.url.indexOf('listener.html') !== -1) {
+	      	var deferred = $q.defer();
+
+		    $timeout(function() {
+		      deferred.resolve(response);
+		    }, 1500);
+
+		    return deferred.promise;
+	      }
+	      return response;
+	    }
+	  };
+	});
 });

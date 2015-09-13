@@ -1,0 +1,110 @@
+<div>
+	<h1>Kuuntelijoiden</h1>
+
+	<p>Tapahtumien käyttö on kätevää ja suositeltavaa mutta niitä käytettäessä pitää muistaa pari sääntöä.</p>
+
+
+
+	<h3>Onko kuuntelija kuuntelemassa?</h3>
+
+	<p ng-hide="showDoc1"><a href="" ng-click="showDoc1 = true">Näytä perustelu</a></p>
+	<p ng-show="showDoc1">
+		<code>AuthorizationService.isAdminUser()</code> valmistuu 500 ms kuluttua controllerin luomisesta mutta <code>ng-include</code>:n kautta lisätty controller käynnistyy vasta 1500 ms päästä, koska <code>listener.html</code> tiedoston lataus kestää niin kauan. Tällöin <code>isAdminUser</code> tapahtumalla ei vielä ole yhtään kuuntelijaa kun tapahtuma lähetetään.
+	</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div ng-controller="BroadcastController">
+				<div class="alert alert-info" role="alert" ng-if="broadcastLog">{{ broadcastLog }}</div>
+				<div ng-include="'templates/kuuntelijat/listener.html'"></div>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('kuuntelijat')
+.controller('BroadcastController', function($scope, AuthorizationService) {
+  AuthorizationService.isAdminUser().then(function(isAdminUser) {
+    $scope.$broadcast('isAdminUser', isAdminUser);
+    $scope.broadcastLog = 'isAdminUser tapahtuma lähti ' + new Date().toISOString();
+  });
+
+})
+.controller('ListenerController', function($scope) {
+  $scope.startupLog = 'ListenerController käynnistettiin ' + new Date().toISOString();
+  $scope.$on('isAdminUser', function(event, isAdminUser) {
+    $scope.message = isAdminUser ? 'Moi admin' : 'Moi tavis';
+  });
+});
+					</div>
+				</div>
+				<div title="service.js" name="service.js" bs-pane>
+					<div hljs no-escape>
+angular.module('kuuntelijat')
+.service('AuthorizationService', function($q, $timeout) {
+  this.isAdminUser = function() {
+    var deferred = $q.defer();
+
+    $timeout(function() {
+      deferred.resolve(true);
+    }, 500);
+
+    return deferred.promise;
+  };
+})
+					</div>
+				</div>
+				<div title="httpInterceptor.js" name="httpInterceptor.js" bs-pane>
+					<div hljs>
+$httpProvider.interceptors.push(function($q, $timeout) {
+    return {
+      response: function(response) {
+        if(response.config.url.indexOf('listener.html') !== -1) {
+          var deferred = $q.defer();
+
+        $timeout(function() {
+          deferred.resolve(response);
+        }, 1500);
+
+        return deferred.promise;
+        }
+        return response;
+      }
+    };
+  });
+					</div>
+				</div>
+				<div title="parent.html" name="parent.html" bs-pane>
+					<div hljs>
+<div ng-controller="BroadcastController">
+  <div class="alert alert-info" role="alert" ng-if="broadcastLog">{{ broadcastLog }}</div>
+  <div ng-include="'templates/kuuntelijat/listener.html'"></div>
+</div>
+					</div>
+				</div>
+				<div title="listener.html" name="listener.html" bs-pane>
+					<div hljs>
+<div ng-controller="ListenerController">
+  <div class="alert alert-info" role="alert" ng-if="startupLog">{{ startupLog }}</div>
+  <div class="alert alert-success" role="alert" ng-if="message">{{ message }}</div>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+
+
+	
+
+
+	
+</div>
