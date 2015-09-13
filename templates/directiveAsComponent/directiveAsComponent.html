@@ -1,0 +1,247 @@
+<div ng-controller="DirectiveAsComponentController">
+	<h1>Directive as component</h1>
+
+	<p>Vähänkään laajemmassa ohjelmassa lomakkeet on pakko pilkkoa pienempiin osiin jotta controllerit ja templatet eibät kasva liian suuriksi. Oletustapa tehdä tämä on siirtää osa logiikasta ala-controllereihin ja ala-templateihin ja liittää ne mukaan <code>ng-include</code> directiivillä. Tässä tavassa on uitenkin ongelmia.</p>
+
+
+
+	<h3>ng-includen ongelmat</h3>
+
+	<p ng-hide="showDoc1"><a href="" ng-click="showDoc1 = true">Näytä perustelu</a></p>
+	<ul ng-show="showDoc1">
+		<li>Ala-scope käyttää suoraan ylä-scopen muuttujaa <code>$scope.order</code> ja muokkaa sen tilaa. Ala-controlleria lukemalla ei saa selville miten se muuttuja alustetaan tai mitään siihen liittyjää logiikkaa.</li>
+		<li>Ala-scope muokkaa ylä-scopen muuttujan tilaa ilman että tätä mitenkään näkee ylä-controllerista.</li>
+		<li>Ala-scope käyttää ylä-scopen yleistä tallennusmetodia ilman että tätä mitenkään näkee ylä-controllerista.</li>
+	</ul>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div ng-controller="ParentOrderController">
+				<div class="alert alert-danger" role="alert" ng-if="errorMessage">{{ errorMessage }}</div>
+				<p><strong>Id:</strong> {{ order.id }}</p>
+				<div ng-include="'templates/directiveAsComponent/products.html'"></div>
+				<button type="button" class="btn btn-primary" ng-hide="order.delivered" ng-click="order.delivered = true; save()">Merkitse toimitetuksi</button>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('directiveAsComponent')
+.controller('ParentOrderController', function($scope, OrderController) {
+  $scope.errorMessage = null;
+  $scope.order = OrderController.load();
+
+  $scope.save = function() {
+  	$scope.errorMessage = null;
+    if($scope.order.products.length === 0) {
+    	$scope.errorMessage = 'Tilauksella pitää olla vähintään yksi tuote!';
+    	return;
+    }
+    OrderController.save($scope.order);
+  };
+})
+.controller('ChildProductsController', function($scope) {
+  $scope.removeProduct = function(product) {
+  	var index = $scope.order.products.indexOf(product);
+  	$scope.order.products.splice(index, 1);
+  	$scope.save();
+  };
+});
+					</div>
+				</div>
+				<div title="service.js" name="service.js" bs-pane>
+					<div hljs no-escape>
+angular.module('directiveAsComponent')
+.service('OrderController', function() {
+  this.load = function() {
+    return {
+      id: 120003,
+      delivered: false,
+      products: [
+        { id: 100, name: 'Hammastahna', qty: 2}, 
+        { id: 200, name: 'Polkupyörä', qty: 4}, 
+        { id: 300, name: 'Mankeli', qty: 1}
+      ]
+    };
+  };
+
+  this.save = function(order) {};
+});
+					</div>
+				</div>
+				<div title="order.html" name="order.html" bs-pane>
+					<div hljs>
+<div ng-controller="ParentOrderController">
+  <div class="alert alert-danger" role="alert" ng-if="errorMessage">{{ errorMessage }}</div>
+  <p><strong>Id:</strong> {{ order.id }}</p>
+  <div ng-include="'templates/directiveAsComponent/products.html'"></div>
+  <button type="button" class="btn btn-primary" ng-hide="order.delivered" ng-click="order.delivered = true; save()">Merkitse toimitetuksi</button>
+</div>
+					</div>
+				</div>
+				<div title="product.html" name="product.html" bs-pane>
+					<div hljs>
+<div ng-controller="ChildProductsController">
+  <p><strong>Tuotteet</strong></p>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Nimi</th>
+        <th>Määrä</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="product in order.products">
+        <td>{{ product.id }}</td>
+        <td>{{ product.name }}</td>
+        <td>{{ product.qty }}</td>
+        <td><a href="" ng-click="removeProduct(product)">Poista</a></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+
+
+	<h3>ng-include -> directive</h3>
+
+	<p ng-hide="showDoc2"><a href="" ng-click="showDoc2 = true">Näytä perustelu</a></p>
+	<p ng-show="showDoc2">
+		Tilanteen pelastaa ala-controllerin liittämisen muuttaminen <code>ng-include</code> -> directive. Ala-controllerin rooli yksinkertaistuu vain <code>products</code> taulukon näyttämiseen ja muokkaukseen, se ei näy muuta tietoa ylä-scopesta eikä pysty kutsumaan sen palveluita. Ylä-controllerin templatesta näkyy nyt myös suoraan että <code>order-products</code> directiiville annetaan tietty data kaksisuuntaisella bindingilla eli directiivi saa muokata sen sisältöä.
+	</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div ng-controller="ParentOrderController2">
+				<div class="alert alert-danger" role="alert" ng-if="errorMessage">{{ errorMessage }}</div>
+				<p><strong>Id:</strong> {{ order.id }}</p>
+				<order-products products="order.products"></order-products>
+				<button type="button" class="btn btn-primary" ng-hide="order.delivered" ng-click="order.delivered = true; save()">Merkitse toimitetuksi</button>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('directiveAsComponent')
+.controller('ParentOrderController2', function($scope, OrderController) {
+  $scope.errorMessage = null;
+  $scope.order = OrderController.load();
+
+  $scope.$on('ChildProductsController2.productRemoved', function() {
+    $scope.save();    
+  });
+
+  $scope.save = function() {
+    $scope.errorMessage = null;
+    if($scope.order.products.length === 0) {
+      $scope.errorMessage = 'Tilauksella pitää olla vähintään yksi tuote!';
+      return;
+    }
+    OrderController.save($scope.order);
+  };
+})
+.controller('ChildProductsController2', function($scope) {
+  $scope.removeProduct = function(product) {
+    var index = $scope.products.indexOf(product);
+    $scope.products.splice(index, 1);
+    $scope.$emit('ChildProductsController2.productRemoved', product);
+  };
+});
+					</div>
+				</div>
+				<div title="directive.js" name="directive.js" bs-pane>
+					<div hljs no-escape>
+angular.module('directiveAsComponent')
+.directive('orderProducts', function() {
+  return {
+    templateUrl: 'templates/directiveAsComponent/products2.html',
+    scope: {
+      products: "="
+    }
+  };
+})
+					</div>
+				</div>
+				<div title="service.js" name="service.js" bs-pane>
+					<div hljs no-escape>
+angular.module('directiveAsComponent')
+.service('OrderController', function() {
+  this.load = function() {
+    return {
+      id: 120003,
+      delivered: false,
+      products: [
+        { id: 100, name: 'Hammastahna', qty: 2}, 
+        { id: 200, name: 'Polkupyörä', qty: 4}, 
+        { id: 300, name: 'Mankeli', qty: 1}
+      ]
+    };
+  };
+
+  this.save = function(order) {};
+});
+					</div>
+				</div>
+				<div title="order.html" name="order.html" bs-pane>
+					<div hljs>
+<div ng-controller="ParentOrderController2">
+  <div class="alert alert-danger" role="alert" ng-if="errorMessage">{{ errorMessage }}</div>
+  <p><strong>Id:</strong> {{ order.id }}</p>
+  <order-products products="order.products"></order-products>
+  <button type="button" class="btn btn-primary" ng-hide="order.delivered" ng-click="order.delivered = true; save()">Merkitse toimitetuksi</button>
+</div>
+					</div>
+				</div>
+				<div title="product.html" name="product.html" bs-pane>
+					<div hljs>
+<div ng-controller="ChildProductsController2">
+  <p><strong>Tuotteet</strong></p>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Nimi</th>
+        <th>Määrä</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="product in products">
+        <td>{{ product.id }}</td>
+        <td>{{ product.name }}</td>
+        <td>{{ product.qty }}</td>
+        <td><a href="" ng-click="removeProduct(product)">Poista</a></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+
+	
+</div>

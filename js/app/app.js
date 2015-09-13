@@ -6,7 +6,8 @@ angular.module('presentationApp', [
 
 	//Content
 	'scopeVsController',
-	'scopenPeriytyminen'
+	'scopenPeriytyminen',
+	'directiveAsComponent'
 	])
 .config(function($routeProvider) {
   $routeProvider
@@ -18,6 +19,9 @@ angular.module('presentationApp', [
     })
     .when('/scopenPeriytyminen', {
       templateUrl:'templates/scopenPeriytyminen/scopenPeriytyminen.html'
+    })
+    .when('/directiveAsComponent', {
+      templateUrl:'templates/directiveAsComponent/directiveAsComponent.html'
     })
     .otherwise({
       redirectTo:'/'
