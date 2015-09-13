@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fi" ng-app="presentationApp">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AngularJS 1.x vinkkejä</title>
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="css/highlightjs/github.min.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 50px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top" bs-navbar>
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#/">AngularJS 1 vinkkejä</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li data-match-route="/scopeVsController"><a href="#/scopeVsController">Scope Vs Controller</a></li>
+            <li data-match-route="/scopenPeriytyminen"><a href="#/scopenPeriytyminen">Scopen periytyminen</a></li>
+            <li data-match-route="/directiveAsComponent"><a href="#/directiveAsComponent">Directive as component</a></li>
+            <li data-match-route="/kuuntelijat"><a href="#/kuuntelijat">Kuuntelijat</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container" ng-view></div>
+
+    <script src="js/lib/angular/angular.min.js"></script>
+    <script src="js/lib/angular/angular-resource.min.js"></script>
+    <script src="js/lib/angular/angular-route.min.js"></script>
+    <script src="js/lib/highlightjs/highlight.min.js"></script>
+    <script src="js/lib/angular-highlightjs/angular-highlightjs.min.js"></script>
+    <script src="js/lib/angular-strap/angular-strap.min.js"></script>
+    <script src="js/lib/angular-strap/angular-strap.tpl.min.js"></script>
+
+    <script src="js/app/app.js"></script>
+
+    <script src="js/app/scopeVsController/scopeVsController.module.js"></script>
+    <script src="js/app/scopeVsController/scopeVsController.controller.js"></script>
+    <script src="js/app/scopeVsController/scope.controller.js"></script>
+    <script src="js/app/scopeVsController/controller.controller.js"></script>
+
+    <script src="js/app/scopenPeriytyminen/scopenPeriytyminen.module.js"></script>
+    <script src="js/app/scopenPeriytyminen/scopenPeriytyminen.controller.js"></script>
+
+    <script src="js/app/directiveAsComponent/directiveAsComponent.module.js"></script>
+    <script src="js/app/directiveAsComponent/directiveAsComponent.controller.js"></script>
+
+    <script src="js/app/kuuntelijat/kuuntelijat.module.js"></script>
+    <script src="js/app/kuuntelijat/kuuntelijat.controller.js"></script>
+</body></html>

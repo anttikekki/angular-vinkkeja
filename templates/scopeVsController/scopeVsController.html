@@ -1,0 +1,165 @@
+<div ng-controller="ScopeVsControllerController">
+	<h1>Scope vs Controller</h1>
+
+	<p>Vanha ja alkuperäinen tapa kommunikoida templaten ja controllerin välillä on scope. Vain scopen muuttujat ja metodit näkyivät templatelle. AngularJS 1.2 lähtien myös controlleria voi käyttää scopenn tapaan käyttämällä <code>controller as ctrl</code> syntaksia eli esim. <code>UserController as userCtrl</code>.</p>
+
+	<p>Toimintojen sekakayttö on teknisesti mahdollista mutta ilman projektinlaajuisia yhteisiä linjoja johtaa sekavaan tilanteeseen jossa koodarin mielen mukaan osa logiikasta on controllerissa ja osa scopessa. Pitää valita!</p>
+
+	<h2>Scope</h2>
+
+	<div class="row">
+		<div class="col-md-4">
+			<p><strong>Hyvää:</strong></p>
+			<ul>
+				<li>Koska scopea kumminkin tarvitaan <code>$scope.$watch()</code>, <code>$scope.$emit()</code> ja <code>$scope.$broadcast()</code> -toimintojen käyttämiseen niin miksi ei kaikkia toimintoja voi lisätä samaan.</li>
+			</ul>
+
+			<p><strong>Huonoa:</strong></p>
+			<ul>
+				<li>Toimii controllerin sijaisena. Sekoittaa controllerin roolin ymmärtämistä.</li>
+				<li>Mahdolistaa ylä-scopen muuttujien ja metdoen tahattoman ja/tai huolimattoman käytön.</li>
+			</ul>
+		</div>
+	</div>
+
+	<h3>Demo</h3>
+
+	<div class="row">
+		<div class="col-md-4">
+				<p>Ohjelman tehtävä: laske klikkausten määrä ja raportoi eventillä kun 5 klikkausta on tehty</p>
+				<p>Tila: 
+					<span class="label label-warning" ng-hide="scopeTaskStatus">Kesken</span>
+					<span class="label label-success" ng-show="scopeTaskStatus">OK!</span>
+				</p>
+
+			<div ng-controller="ScopeController">
+				<div class="alert" ng-class="{'alert-warning': clickCount < 5, 'alert-success': clickCount >= 5 }" role="alert">{{ message }}</div>
+
+				<p>
+					<button type="button" class="btn btn-primary" ng-click="addClick()">
+						Klikkaa! <span class="badge">{{ clickCount }}</span>
+					</button>
+				</p>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape compile="true">
+angular.module('scopeVsController').controller('ScopeController', function($scope) {
+  $scope.clickCount = 0;
+  $scope.message  = '';
+
+  $scope.addClick = function() {
+  	$scope.clickCount++;
+  };
+
+  $scope.$watch('clickCount', function(newValue) {
+  	$scope.message = newValue &lt; 5 ? 'Alle viisi klikkausta' : 'Viisi tai enemmän klikkausta';
+  	if(newValue >= 5) {
+  	  $scope.$emit('ScopeController.fiveClicksOK');
+  	}
+  });
+});
+					</div>
+				</div>
+				<div title="template.html" name="template.html" bs-pane>
+					<div hljs compile="true">
+<div ng-controller="ScopeController">
+  <div class="alert" ng-class="{'alert-warning': clickCount < 5, 'alert-success': clickCount >= 5 }" role="alert">{{ message }}</div>
+
+  <p>
+    <button type="button" class="btn btn-primary" ng-click="addClick()">
+      Klikkaa! <span class="badge">{{ clickCount }}</span>
+    </button>
+  </p>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+	<h2>Controller as</h2>
+
+	<div class="row">
+		<div class="col-md-4">
+			<p><strong>Hyvää:</strong></p>
+			<ul>
+				<li>Selkeyttää controllerin roolia ja vie sitä lähemmäksi JavaScriptin normi-"luokkia"</li>
+				<li>Estää ylä-scopen tahattomat väärinkäytön</li>
+			</ul>
+
+			<p><strong>Huonoa:</strong></p>
+			<ul>
+				<li>Scopea tarvitaan kumminkin <code>$scope.$watch()</code>, <code>$scope.$emit()</code> ja <code>$scope.$broadcast()</code> -toimintoihin</li>
+				<li><code>$scope.$watch()</code> syntaksi sekavampi koska pitää käyttä funnctiota wrappaamaan muuttuja.</li>
+			</ul>
+		</div>
+	</div>
+
+	<h3>Demo</h3>
+
+	<div class="row">
+		<div class="col-md-4">
+				<p>Ohjelman tehtävä: laske klikkausten määrä ja raportoi eventillä kun 5 klikkausta on tehty</p>
+				<p>Tila: 
+					<span class="label label-warning" ng-hide="controllerTaskStatus">Kesken</span>
+					<span class="label label-success" ng-show="controllerTaskStatus">OK!</span>
+				</p>
+
+			<div ng-controller="ControllerController as ctrl">
+				<div class="alert" ng-class="{'alert-warning': ctrl.clickCount < 5, 'alert-success': ctrl.clickCount >= 5 }" role="alert">{{ ctrl.message }}</div>
+
+				<p>
+					<button type="button" class="btn btn-primary" ng-click="ctrl.addClick()">
+						Klikkaa! <span class="badge">{{ ctrl.clickCount }}</span>
+					</button>
+				</p>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape compile="true">
+angular.module('scopeVsController').controller('ControllerController', function($scope) {
+  var controller = this;
+  controller.clickCount = 0;
+  controller.message  = '';
+
+  controller.addClick = function() {
+  	controller.clickCount++;
+  };
+
+  $scope.$watch(function() { return controller.clickCount; }, function(newValue) {
+  	controller.message = newValue &lt; 5 ? 'Alle viisi klikkausta' : 'Viisi tai enemmän klikkausta';
+  	if(newValue >= 5) {
+  		$scope.$emit('ControllerController.fiveClicksOK');
+  	}
+  });
+});
+					</div>
+				</div>
+				<div title="template.html" name="template.html" bs-pane>
+					<div hljs compile="true">
+<div ng-controller="ControllerController as ctrl">
+  <div class="alert" ng-class="{'alert-warning': ctrl.clickCount < 5, 'alert-success': ctrl.clickCount >= 5 }" role="alert">{{ ctrl.message }}</div>
+
+  <p>
+    <button type="button" class="btn btn-primary" ng-click="ctrl.addClick()">
+      Klikkaa! <span class="badge">{{ ctrl.clickCount }}</span>
+    </button>
+  </p>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+</div>

@@ -1,0 +1,21 @@
+<div ng-controller="ChildProductsController2">
+	<p><strong>Tuotteet</strong></p>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Nimi</th>
+				<th>Määrä</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="product in products">
+				<td>{{ product.id }}</td>
+				<td>{{ product.name }}</td>
+				<td>{{ product.qty }}</td>
+				<td><a href="" ng-click="removeProduct(product)">Poista</a></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
