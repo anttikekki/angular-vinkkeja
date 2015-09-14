@@ -8,7 +8,8 @@ angular.module('presentationApp', [
 	'scopeVsController',
 	'scopenPeriytyminen',
 	'directiveAsComponent',
-	'kuuntelijat'
+	'kuuntelijat',
+	'watchNyanssit'
 	])
 .config(function($routeProvider, $httpProvider) {
   $routeProvider
@@ -26,6 +27,9 @@ angular.module('presentationApp', [
     })
     .when('/kuuntelijat', {
       templateUrl:'templates/kuuntelijat/kuuntelijat.html'
+    })
+    .when('/watchNyanssit', {
+      templateUrl:'templates/watchNyanssit/watchNyanssit.html'
     })
     .otherwise({
       redirectTo:'/'

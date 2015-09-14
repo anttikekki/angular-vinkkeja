@@ -48,7 +48,7 @@ angular.module('kuuntelijat')
   $scope.lapsi = false;
   
   $scope.$on('Hei äiti, minä täällä!', function(event, lapsi) {
-    $scope.messages.push('Lapsi on syntynyt!');
+    $scope.messages.push('Lapsi ' + lapsi + ' on syntynyt!');
   });
 
   $scope.teeLapsi = function() {
@@ -59,13 +59,15 @@ angular.module('kuuntelijat')
   };
 })
 .controller('LapsiController', function($scope, LapsiService) {
-  $scope.$on('Lapsi, kuuletko minua?', LapsiService.vastaaAidille);
+  $scope.$on('Lapsi, kuuletko minua?', LapsiService.vastaaAidilleWrapper($scope.$id));
 })
-.controller('PahaLapsiController', function($rootScope, LapsiService) {
-  $rootScope.$on('Lapsi, kuuletko minua?', LapsiService.vastaaAidille);
+.controller('PahaLapsiController', function($scope, $rootScope, LapsiService) {
+  $rootScope.$on('Lapsi, kuuletko minua?', LapsiService.vastaaAidilleWrapper($scope.$id));
 })
 .service('LapsiService', function($rootScope) {
-  this.vastaaAidille = function() {
-    $rootScope.$broadcast('Hei äiti, minä täällä!');
+  this.vastaaAidilleWrapper = function(nimi) {
+    return function() {
+      $rootScope.$broadcast('Hei äiti, minä täällä!', nimi);
+    };
   }
 });
