@@ -1,5 +1,5 @@
 <div>
-	<h1>Kuuntelijoiden</h1>
+	<h1>Kuuntelijoiden vaarat</h1>
 
 	<p>Tapahtumien käyttö on kätevää ja suositeltavaa mutta niitä käytettäessä pitää muistaa pari sääntöä.</p>
 
@@ -89,6 +89,151 @@ $httpProvider.interceptors.push(function($q, $timeout) {
 <div ng-controller="ListenerController">
   <div class="alert alert-info" role="alert" ng-if="startupLog">{{ startupLog }}</div>
   <div class="alert alert-success" role="alert" ng-if="message">{{ message }}</div>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+
+	<h3>Kuuletko sisko?</h3>
+
+	<p ng-hide="showDoc2"><a href="" ng-click="showDoc2 = true">Näytä perustelu</a></p>
+	<p ng-show="showDoc2">
+		<code>$scope.$broadcast</code> lähettää viestejä alaspäin scopesta ja <code>$scope.$emit</code> lähettää ylöspäin. Kumpikaan näistä ei kantaudu siskoille joiden scopet ovat rinnakkaisia, saman ylä-scopen alaisia. Varsinkin directiiveissä, jotka voidaa sijoittaa minne tahansa DOM-puussa, varmin keino saavuuttaa kaikki kuuntelijat on käyttää <code>$rootScope.$broadcast</code>.
+	</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div ng-controller="Sisko1Controller"></div>
+			<div ng-controller="Sisko2Controller">
+				<div class="alert alert-info" ng-repeat="message in messages">{{ message }}</div>
+			</div>
+			<div ng-controller="Sisko3Controller"></div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('kuuntelijat')
+.controller('Sisko1Controller', function($scope, $timeout) {
+  $timeout(function() {
+    $scope.$broadcast('Haloo sisko siellä alhaalla?', 1);
+    $scope.$emit('Haloo sisko siellä ylhäällä?', 1);
+  }, 500);
+})
+.controller('Sisko2Controller', function($scope) {
+  $scope.messages = [];
+  $scope.$on('Haloo sisko siellä ylhäällä?', function(event, sisko) {
+    $scope.messages.push('Kuulen sinua siellä alhaalla, sisko ' + sisko + '. Minä olen sisko 2');
+  });
+  $scope.$on('Haloo sisko siellä alhaalla?', function(event, sisko) {
+    $scope.messages.push('Kuulen sinua siellä ylhäällä, sisko ' + sisko + '. Minä olen sisko 2');
+  });
+})
+.controller('Sisko3Controller', function($rootScope, $timeout) {
+  $timeout(function() {
+    $rootScope.$broadcast('Haloo sisko siellä alhaalla?', 3);
+  }, 500);
+});
+					</div>
+				</div>
+				<div title="template.html" name="template.html" bs-pane>
+					<div hljs>
+<div ng-controller="Sisko1Controller"></div>
+<div ng-controller="Sisko2Controller">
+  <div class="alert alert-info" ng-repeat="message in messages">{{ message }}</div>
+</div>
+<div ng-controller="Sisko3Controller"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+
+
+
+
+
+	<h3>Muuttaako lapsi pois kotoa?</h3>
+
+	<p ng-hide="showDoc3"><a href="" ng-click="showDoc3 = true">Näytä perustelu</a></p>
+	<p ng-show="showDoc3">
+		<code>$rootScope.$on</code> on vaarallinen koska sen kuuntelija voi jäädä henkiin vaikka controller poistuu alta. Älä koskaan kuuntele <code>$rootScope</code>:lla tapahtumia vaan aina controllerin omalla scopella. <code>$rootScope</code> voi käyttää turvallisesti tapahtumien lähettämiseen.
+	</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div ng-controller="AitiController">
+				<button type="button" class="btn btn-primary" ng-hide="lapsi" ng-click="teeLapsi()">Tee 2 lasta</button>
+				<button type="button" class="btn btn-primary" ng-show="lapsi" ng-click="lapsi = false; messages.length = 0">Hylkää kaikki lapset</button>
+				<div ng-controller="LapsiController" ng-if="lapsi"></div>
+				<div ng-controller="PahaLapsiController" ng-if="lapsi"></div>
+				<div class="alert alert-info" ng-repeat="message in messages track by $index">{{ message }}</div>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('kuuntelijat')
+.controller('AitiController', function($scope, $timeout, $rootScope) {
+  $scope.messages = [];
+  $scope.lapsi = false;
+  
+  $scope.$on('Hei äiti, minä täällä!', function(event, lapsi) {
+    $scope.messages.push('Lapsi ' + lapsi + ' on syntynyt!');
+  });
+
+  $scope.teeLapsi = function() {
+    $scope.lapsi = true;
+    $timeout(function() {
+      $rootScope.$broadcast('Lapsi, kuuletko minua?');
+    }, 100);
+  };
+})
+.controller('LapsiController', function($scope, LapsiService) {
+  $scope.$on('Lapsi, kuuletko minua?', LapsiService.vastaaAidilleWrapper($scope.$id));
+})
+.controller('PahaLapsiController', function($scope, $rootScope, LapsiService) {
+  $rootScope.$on('Lapsi, kuuletko minua?', LapsiService.vastaaAidilleWrapper($scope.$id));
+});
+					</div>
+				</div>
+				<div title="service.js" name="service.js" bs-pane>
+					<div hljs no-escape>
+angular.module('kuuntelijat')
+.service('LapsiService', function($rootScope) {
+  this.vastaaAidilleWrapper = function(nimi) {
+    return function() {
+      $rootScope.$broadcast('Hei äiti, minä täällä!', nimi);
+    };
+  }
+});
+					</div>
+				</div>
+				<div title="template.html" name="template.html" bs-pane>
+					<div hljs>
+<div ng-controller="AitiController">
+  <button type="button" class="btn btn-primary" ng-hide="lapsi" ng-click="teeLapsi()">Tee 2 lasta</button>
+  <button type="button" class="btn btn-primary" ng-show="lapsi" ng-click="lapsi = false; messages.length = 0">Hylkää kaikki lapset</button>
+  <div ng-controller="LapsiController" ng-if="lapsi"></div>
+  <div ng-controller="PahaLapsiController" ng-if="lapsi"></div>
+  <div class="alert alert-info" ng-repeat="message in messages track by $index">{{ message }}</div>
 </div>
 					</div>
 				</div>

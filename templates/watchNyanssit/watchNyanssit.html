@@ -1,0 +1,261 @@
+<div>
+	<h1>$watch nyanssit</h1>
+
+	<p></p>
+
+
+
+	<h3>Toimiiko bi-directional binding (vol. 1)?</h3>
+
+	<p ng-hide="showDoc1"><a href="" ng-click="showDoc1 = true">Näytä perustelu</a></p>
+	<p ng-show="showDoc1">
+		Tuotteiden lisäystä ei havaita <code>$scope.$watch</code>:lla koska se tarkastelee oletuksena vain itse Array-olion referenssiä, eli vain koko Arrayn muuttaminen laukaisee kuuntelijan.
+	</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div ng-controller="WatchParentController">
+				<p>
+					{{ tuotteet | json }}
+				</p>
+
+				<button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää tuote</button>
+				<button type="button" class="btn btn-primary" ng-click="tuotteet = []">Äiti: tyhjennä tuotteet</button>
+				<watch-child-1 tuotteet="tuotteet"></watch-child-1>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('watchNyanssit')
+.controller('WatchParentController', function($scope) {
+  $scope.tuotteet = [{id: 5}, {id: 34}, {id: 88}];
+  $scope.counter = 500;
+  $scope.lisaaTuote = function() {
+  	$scope.tuotteet.push({id: $scope.counter++});
+  };
+})
+.controller('WatchChildController1', function($scope, $filter) {
+  $scope.message = null;
+  $scope.$watch('tuotteet', function() {
+  	$scope.message = 'Lapsi huomasi tuotteiden päivittyneen: ' + $filter('json')($scope.tuotteet);
+  });
+});
+					</div>
+				</div>
+				<div title="directive.js" name="directive.js" bs-pane>
+					<div hljs no-escape>
+angular.module('watchNyanssit')
+.directive('watchChild1', function() {
+  return {
+    templateUrl: 'templates/watchNyanssit/watchChild.html',
+    controller: 'WatchChildController1',
+    scope: {
+      tuotteet: '='
+    }
+  };
+});
+					</div>
+				</div>
+				<div title="parent.html" name="parent.html" bs-pane>
+					<div hljs>
+<div ng-controller="WatchParentController">
+  <p>
+    {{ tuotteet | json }}
+  </p>
+
+  <button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää tuote</button>
+  <button type="button" class="btn btn-primary" ng-click="tuotteet = []">Äiti: tyhjennä tuotteet</button>
+  <watch-child-1 tuotteet="tuotteet"></watch-child-1>
+</div>
+					</div>
+				</div>
+				<div title="watchChild.html" name="watchChild.html" bs-pane>
+					<div hljs>
+<div>
+  <div class="alert alert-info" ng-if="message">{{ message }}</div>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+
+	<h3>Toimiiko bi-directional binding (vol. 2)?</h3>
+
+	<p ng-hide="showDoc2"><a href="" ng-click="showDoc2 = true">Näytä perustelu</a></p>
+	<p ng-show="showDoc2">
+		Tuotteiden lisäys havaitaan <code>$scope.$watch</code>:lla koska sille on annettu kolmas <code>objectEquality</code> jolloin muutokset tarkastetaan vertaamalla Arrayn jokaisen olion kaikkia kenttiä. Tämä on erittäin raskasta koska tarkastus tehdään jokaisen scopen muutoksen yhteydessä (esim. textareaan on isätty yksi kirjain).
+	</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div ng-controller="WatchParentController">
+				<p>
+					{{ tuotteet | json }}
+				</p>
+
+				<button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää tuote</button>
+				<button type="button" class="btn btn-primary" ng-click="tuotteet = []">Äiti: tyhjennä tuotteet</button>
+				<watch-child-2 tuotteet="tuotteet"></watch-child-2>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('watchNyanssit')
+.controller('WatchParentController', function($scope) {
+  $scope.tuotteet = [{id: 5}, {id: 34}, {id: 88}];
+  $scope.counter = 500;
+  $scope.lisaaTuote = function() {
+  	$scope.tuotteet.push({id: $scope.counter++});
+  };
+})
+.controller('WatchChildController2', function($scope, $filter) {
+  $scope.message = null;
+  $scope.$watch('tuotteet', function() {
+  	$scope.message = 'Lapsi huomasi tuotteiden päivittyneen: ' + $filter('json')($scope.tuotteet);
+  }, true);
+});
+					</div>
+				</div>
+				<div title="directive.js" name="directive.js" bs-pane>
+					<div hljs no-escape>
+angular.module('watchNyanssit')
+.directive('watchChild2', function() {
+  return {
+    templateUrl: 'templates/watchNyanssit/watchChild.html',
+    controller: 'WatchChildController2',
+    scope: {
+      tuotteet: '='
+    }
+  };
+});
+					</div>
+				</div>
+				<div title="parent.html" name="parent.html" bs-pane>
+					<div hljs>
+<div ng-controller="WatchParentController">
+  <p>
+    {{ tuotteet | json }}
+  </p>
+
+  <button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää tuote</button>
+  <button type="button" class="btn btn-primary" ng-click="tuotteet = []">Äiti: tyhjennä tuotteet</button>
+  <watch-child-2 tuotteet="tuotteet"></watch-child-2>
+</div>
+					</div>
+				</div>
+				<div title="watchChild.html" name="watchChild.html" bs-pane>
+					<div hljs>
+<div>
+  <div class="alert alert-info" ng-if="message">{{ message }}</div>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+
+
+	<h3>Toimiiko bi-directional binding (vol. 3)?</h3>
+
+	<p ng-hide="showDoc3"><a href="" ng-click="showDoc3 = true">Näytä perustelu</a></p>
+	<p ng-show="showDoc3">
+		Tuotteiden lisäys havaitaan <code>$scope.$watch</code>:lla koska 
+	</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div ng-controller="WatchParentController">
+				<p>
+					{{ tuotteet | json }}
+				</p>
+
+				<button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää tuote</button>
+				<button type="button" class="btn btn-primary" ng-click="tuotteet = []">Äiti: tyhjennä tuotteet</button>
+				<watch-child-3 tuotteet="tuotteet"></watch-child-3>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('watchNyanssit')
+.controller('WatchParentController', function($scope) {
+  $scope.tuotteet = [{id: 5}, {id: 34}, {id: 88}];
+  $scope.counter = 500;
+  $scope.lisaaTuote = function() {
+  	$scope.tuotteet.push({id: $scope.counter++});
+  };
+})
+.controller('WatchChildController2', function($scope, $filter) {
+  $scope.message = null;
+  $scope.$watch('tuotteet', function() {
+  	$scope.message = 'Lapsi huomasi tuotteiden päivittyneen: ' + $filter('json')($scope.tuotteet);
+  }, true);
+});
+					</div>
+				</div>
+				<div title="directive.js" name="directive.js" bs-pane>
+					<div hljs no-escape>
+angular.module('watchNyanssit')
+.directive('watchChild2', function() {
+  return {
+    templateUrl: 'templates/watchNyanssit/watchChild.html',
+    controller: 'WatchChildController2',
+    scope: {
+      tuotteet: '='
+    }
+  };
+});
+					</div>
+				</div>
+				<div title="parent.html" name="parent.html" bs-pane>
+					<div hljs>
+<div ng-controller="WatchParentController">
+  <p>
+    {{ tuotteet | json }}
+  </p>
+
+  <button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää tuote</button>
+  <button type="button" class="btn btn-primary" ng-click="tuotteet = []">Äiti: tyhjennä tuotteet</button>
+  <watch-child-2 tuotteet="tuotteet"></watch-child-2>
+</div>
+					</div>
+				</div>
+				<div title="watchChild.html" name="watchChild.html" bs-pane>
+					<div hljs>
+<div>
+  <div class="alert alert-info" ng-if="message">{{ message }}</div>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+	
+</div>
