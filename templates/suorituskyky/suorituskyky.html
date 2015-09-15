@@ -1,0 +1,83 @@
+<div>
+	<h1>Suorituskyky</h1>
+
+	<p>Normaaleilla formipohjaisilla näyöillä lähes millä tahansa koodaustyylillä suorituskyvystä ei tule ongelmia. Listoissa ja puissa, joissa on paljon toistuvia elementteja, on tilanne jo toinen. Yllättävän pienilläkin "virheillä" saa modernin selaimen modernilla koneella aivan kyykkyyn.</p>
+
+
+
+	<h3>Älä bindaa templaten arvoa funktion tulokseen</h3>
+
+	<p>Bindattu funktio suoritetaan JOKAISEN muokkauksen jälkeen, esim. kaikissa ng-click ja ng-model muutoksissa.</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div ng-controller="SuorituskykyController1">
+				<p><label>Hae asiakkaan nimellä</label> <input type="text" ng-model="hakusana"/></p>
+				<p><code>$scope.getOrderValue()</code> metodia on kutsuttu {{ getOrderValueCallCountMessage }} kertaa</p>
+				<div ng-repeat="customer in customers | filter:{name: hakusana}">{{ customer.name }} (tilausten arvo {{ getOrderValue(customer.id) }} €)</div>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('suorituskyky')
+.controller('SuorituskykyController1', function($scope) {
+  $scope.customers = [];
+  $scope.orders = [];
+  $scope.getOrderValueCallCount = 0;
+  $scope.getOrderValueCallCountMessage = '';
+
+  var count = 1;
+  while(count &lt; 30) {
+  	var orderCount = 1;
+  	while(orderCount &lt; 5000) {
+  	  $scope.orders.push({
+  	  	customerId: count,
+  	  	value: orderCount * count
+  	  });
+  	  orderCount++;
+  	}
+
+  	$scope.customers.push({
+  	  id: count,
+  	  name: 'Asiakas '+count
+  	});
+  	count++;
+  }
+
+  $scope.getOrderValue = function(customerId) {
+  	$scope.getOrderValueCallCount++;
+  	if($scope.getOrderValueCallCount % 100 == 0) {
+  	  $scope.getOrderValueCallCountMessage = $scope.getOrderValueCallCount + '+';
+  	}
+  	
+  	var orderValue = 0;
+  	$scope.orders
+  	.filter(function(o) { return o.customerId === customerId})
+  	.forEach(function(o) { orderValue += o.value });
+  	return orderValue;
+  };
+
+});
+					</div>
+				</div>
+				<div title="template.html" name="template.html" bs-pane>
+					<div hljs>
+<div ng-controller="SuorituskykyController1">
+  <p><label>Hae asiakkaan nimellä</label> <input type="text" ng-model="hakusana"/></p>
+  <p><code>$scope.getOrderValue()</code> metodia on kutsuttu {{ getOrderValueCallCount }} kertaa</p>
+  <div ng-repeat="customer in customers">{{ customer.name }} (tilausten arvo {{ getOrderValue(customer.id) }} €)</div>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+	
+</div>

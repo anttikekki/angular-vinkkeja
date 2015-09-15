@@ -10,7 +10,8 @@ angular.module('presentationApp', [
 	'directiveAsComponent',
 	'kuuntelijat',
 	'watchNyanssit',
-	'promiset'
+	'promiset',
+	'suorituskyky'
 	])
 .config(function($routeProvider, $httpProvider) {
   $routeProvider
@@ -34,6 +35,9 @@ angular.module('presentationApp', [
     })
     .when('/promiset', {
       templateUrl:'templates/promiset/promiset.html'
+    })
+    .when('/suorituskyky', {
+      templateUrl:'templates/suorituskyky/suorituskyky.html'
     })
     .otherwise({
       redirectTo:'/'

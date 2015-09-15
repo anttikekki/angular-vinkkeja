@@ -258,7 +258,7 @@ angular.module('watchNyanssit')
 
 	<p ng-hide="showDoc3"><a href="" ng-click="showDoc3 = true">Näytä perustelu</a></p>
 	<p ng-show="showDoc3">
-		Tuotteiden lisäys havaitaan <code>$scope.$watch</code>:lla koska 
+		Tuotteiden lisäys ja poisto havaitaan <code>$scope.$watchCollection</code>:lla koska se tutkii olioiden määrää ja vertailee niiden yhtäsuuruutta nopealla <code>===</code> vertailulla. Olion sisäisiä muokkauksia ei havaita. Myös kahden samanlaisen olion vertailu epäonnistuu jos kyseessä on eli instanssi eli <code>{id:1} !== {id:1}</code>
 	</p>
 
 	<div class="row">
