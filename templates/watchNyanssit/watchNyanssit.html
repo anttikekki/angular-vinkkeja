@@ -5,7 +5,7 @@
 
 
 
-	<h3>Toimiiko bi-directional binding (vol. 1)?</h3>
+	<h3>Toimiiko $scope.$watch objectEquality = false?</h3>
 
 	<p ng-hide="showDoc1"><a href="" ng-click="showDoc1 = true">Näytä perustelu</a></p>
 	<p ng-show="showDoc1">
@@ -14,13 +14,15 @@
 
 	<div class="row">
 		<div class="col-md-4">
-			<div ng-controller="WatchParentController">
-				<p>
-					{{ tuotteet | json }}
-				</p>
+			<div ng-controller="WatchParentController1">
+				<p>{{ tuotteet | json }}</p>
+				<div class="alert alert-info" ng-if="message">{{ message }}</div>
 
-				<button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää tuote</button>
-				<button type="button" class="btn btn-primary" ng-click="tuotteet = []">Äiti: tyhjennä tuotteet</button>
+				<p>
+					<button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää</button>
+					<button type="button" class="btn btn-primary" ng-click="tyhjenna()">Äiti: tyhjennä</button>
+					<button type="button" class="btn btn-primary" ng-click="muokkaa()">Äiti: muokkaa</button>
+				</p>
 				<watch-child-1 tuotteet="tuotteet"></watch-child-1>
 			</div>
 		</div>
@@ -30,11 +32,28 @@
 				<div title="controller.js" name="controller.js" bs-pane>
 					<div hljs no-escape>
 angular.module('watchNyanssit')
-.controller('WatchParentController', function($scope) {
+.controller('WatchParentController1', function($scope, $filter) {
   $scope.tuotteet = [{id: 5}, {id: 34}, {id: 88}];
+
+  $scope.message = null;
+  $scope.$watch('tuotteet', function() {
+  	$scope.message = 'Äiti huomasi tuotteiden päivittyneen: ' + $filter('json')($scope.tuotteet);
+  });
+
   $scope.counter = 500;
   $scope.lisaaTuote = function() {
+  	$scope.message = null;
   	$scope.tuotteet.push({id: $scope.counter++});
+  };
+  $scope.tyhjenna = function() {
+  	$scope.message = null;
+  	$scope.tuotteet.length = 0;
+  };
+  $scope.muokkaa = function() {
+  	if($scope.tuotteet.length > 0) {
+  	  var tuote = $scope.tuotteet[$scope.tuotteet.length-1];
+  	  tuote.id += 150;
+  	}
   };
 })
 .controller('WatchChildController1', function($scope, $filter) {
@@ -42,6 +61,22 @@ angular.module('watchNyanssit')
   $scope.$watch('tuotteet', function() {
   	$scope.message = 'Lapsi huomasi tuotteiden päivittyneen: ' + $filter('json')($scope.tuotteet);
   });
+
+  $scope.counter = 600;
+  $scope.lisaaTuote = function() {
+  	$scope.message = null;
+  	$scope.tuotteet.push({id: $scope.counter++});
+  };
+  $scope.tyhjenna = function() {
+  	$scope.message = null;
+  	$scope.tuotteet.length = 0;
+  };
+  $scope.muokkaa = function() {
+  	if($scope.tuotteet.length > 0) {
+  	  var tuote = $scope.tuotteet[$scope.tuotteet.length-1];
+  	  tuote.id += 150;
+  	}
+  };
 });
 					</div>
 				</div>
@@ -61,13 +96,15 @@ angular.module('watchNyanssit')
 				</div>
 				<div title="parent.html" name="parent.html" bs-pane>
 					<div hljs>
-<div ng-controller="WatchParentController">
-  <p>
-    {{ tuotteet | json }}
-  </p>
+<div ng-controller="WatchParentController1">
+  <p>{{ tuotteet | json }}</p>
+  <div class="alert alert-info" ng-if="message">{{ message }}</div>
 
-  <button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää tuote</button>
-  <button type="button" class="btn btn-primary" ng-click="tuotteet = []">Äiti: tyhjennä tuotteet</button>
+  <p>
+    <button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää</button>
+    <button type="button" class="btn btn-primary" ng-click="tyhjenna()">Äiti: tyhjennä</button>
+    <button type="button" class="btn btn-primary" ng-click="muokkaa()">Äiti: muokkaa</button>
+  </p>
   <watch-child-1 tuotteet="tuotteet"></watch-child-1>
 </div>
 					</div>
@@ -76,6 +113,9 @@ angular.module('watchNyanssit')
 					<div hljs>
 <div>
   <div class="alert alert-info" ng-if="message">{{ message }}</div>
+  <button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Lapsi: lisää</button>
+  <button type="button" class="btn btn-primary" ng-click="tyhjenna()">Lapsi: tyhjennä</button>
+  <button type="button" class="btn btn-primary" ng-click="muokkaa()">Lapsi: muokkaa</button>
 </div>
 					</div>
 				</div>
@@ -89,22 +129,24 @@ angular.module('watchNyanssit')
 
 
 
-	<h3>Toimiiko bi-directional binding (vol. 2)?</h3>
+	<h3>Toimiiko $scope.$watch objectEquality = true?</h3>
 
 	<p ng-hide="showDoc2"><a href="" ng-click="showDoc2 = true">Näytä perustelu</a></p>
 	<p ng-show="showDoc2">
-		Tuotteiden lisäys havaitaan <code>$scope.$watch</code>:lla koska sille on annettu kolmas <code>objectEquality</code> jolloin muutokset tarkastetaan vertaamalla Arrayn jokaisen olion kaikkia kenttiä. Tämä on erittäin raskasta koska tarkastus tehdään jokaisen scopen muutoksen yhteydessä (esim. textareaan on isätty yksi kirjain).
+		Tuotteiden lisäys havaitaan <code>$scope.$watch</code>:lla koska sille on annettu kolmas parametri <code>objectEquality</code> jolloin muutokset tarkastetaan vertaamalla Arrayn jokaisen olion kaikkia kenttiä. Tämä on erittäin raskasta koska tarkastus tehdään jokaisen scopen muutoksen yhteydessä (esim. textareaan on isätty yksi kirjain).
 	</p>
 
 	<div class="row">
 		<div class="col-md-4">
-			<div ng-controller="WatchParentController">
-				<p>
-					{{ tuotteet | json }}
-				</p>
+			<div ng-controller="WatchParentController2">
+				<p>{{ tuotteet | json }}</p>
+				<div class="alert alert-info" ng-if="message">{{ message }}</div>
 
-				<button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää tuote</button>
-				<button type="button" class="btn btn-primary" ng-click="tuotteet = []">Äiti: tyhjennä tuotteet</button>
+				<p>
+					<button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää</button>
+					<button type="button" class="btn btn-primary" ng-click="tyhjenna()">Äiti: tyhjennä</button>
+					<button type="button" class="btn btn-primary" ng-click="muokkaa()">Äiti: muokkaa</button>
+				</p>
 				<watch-child-2 tuotteet="tuotteet"></watch-child-2>
 			</div>
 		</div>
@@ -114,11 +156,28 @@ angular.module('watchNyanssit')
 				<div title="controller.js" name="controller.js" bs-pane>
 					<div hljs no-escape>
 angular.module('watchNyanssit')
-.controller('WatchParentController', function($scope) {
+.controller('WatchParentController2', function($scope, $filter) {
   $scope.tuotteet = [{id: 5}, {id: 34}, {id: 88}];
+
+  $scope.message = null;
+  $scope.$watch('tuotteet', function() {
+  	$scope.message = 'Äiti huomasi tuotteiden päivittyneen: ' + $filter('json')($scope.tuotteet);
+  }, true);
+
   $scope.counter = 500;
   $scope.lisaaTuote = function() {
+  	$scope.message = null;
   	$scope.tuotteet.push({id: $scope.counter++});
+  };
+  $scope.tyhjenna = function() {
+  	$scope.message = null;
+  	$scope.tuotteet.length = 0;
+  };
+  $scope.muokkaa = function() {
+  	if($scope.tuotteet.length > 0) {
+  	  var tuote = $scope.tuotteet[$scope.tuotteet.length-1];
+  	  tuote.id += 150;
+  	}
   };
 })
 .controller('WatchChildController2', function($scope, $filter) {
@@ -126,6 +185,22 @@ angular.module('watchNyanssit')
   $scope.$watch('tuotteet', function() {
   	$scope.message = 'Lapsi huomasi tuotteiden päivittyneen: ' + $filter('json')($scope.tuotteet);
   }, true);
+
+  $scope.counter = 600;
+  $scope.lisaaTuote = function() {
+  	$scope.message = null;
+  	$scope.tuotteet.push({id: $scope.counter++});
+  };
+  $scope.tyhjenna = function() {
+  	$scope.message = null;
+  	$scope.tuotteet.length = 0;
+  };
+  $scope.muokkaa = function() {
+  	if($scope.tuotteet.length > 0) {
+  	  var tuote = $scope.tuotteet[$scope.tuotteet.length-1];
+  	  tuote.id += 150;
+  	}
+  };
 });
 					</div>
 				</div>
@@ -145,13 +220,15 @@ angular.module('watchNyanssit')
 				</div>
 				<div title="parent.html" name="parent.html" bs-pane>
 					<div hljs>
-<div ng-controller="WatchParentController">
-  <p>
-    {{ tuotteet | json }}
-  </p>
+<div ng-controller="WatchParentController2">
+  <p>{{ tuotteet | json }}</p>
+  <div class="alert alert-info" ng-if="message">{{ message }}</div>
 
-  <button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää tuote</button>
-  <button type="button" class="btn btn-primary" ng-click="tuotteet = []">Äiti: tyhjennä tuotteet</button>
+  <p>
+    <button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää</button>
+    <button type="button" class="btn btn-primary" ng-click="tyhjenna()">Äiti: tyhjennä</button>
+    <button type="button" class="btn btn-primary" ng-click="muokkaa()">Äiti: muokkaa</button>
+  </p>
   <watch-child-2 tuotteet="tuotteet"></watch-child-2>
 </div>
 					</div>
@@ -160,6 +237,9 @@ angular.module('watchNyanssit')
 					<div hljs>
 <div>
   <div class="alert alert-info" ng-if="message">{{ message }}</div>
+  <button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Lapsi: lisää</button>
+  <button type="button" class="btn btn-primary" ng-click="tyhjenna()">Lapsi: tyhjennä</button>
+  <button type="button" class="btn btn-primary" ng-click="muokkaa()">Lapsi: muokkaa</button>
 </div>
 					</div>
 				</div>
@@ -174,7 +254,7 @@ angular.module('watchNyanssit')
 
 
 
-	<h3>Toimiiko bi-directional binding (vol. 3)?</h3>
+	<h3>Toimiiko $scope.$watchCollection?</h3>
 
 	<p ng-hide="showDoc3"><a href="" ng-click="showDoc3 = true">Näytä perustelu</a></p>
 	<p ng-show="showDoc3">
@@ -183,13 +263,15 @@ angular.module('watchNyanssit')
 
 	<div class="row">
 		<div class="col-md-4">
-			<div ng-controller="WatchParentController">
-				<p>
-					{{ tuotteet | json }}
-				</p>
+			<div ng-controller="WatchParentController3">
+				<p>{{ tuotteet | json }}</p>
+				<div class="alert alert-info" ng-if="message">{{ message }}</div>
 
-				<button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää tuote</button>
-				<button type="button" class="btn btn-primary" ng-click="tuotteet = []">Äiti: tyhjennä tuotteet</button>
+				<p>
+					<button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää</button>
+					<button type="button" class="btn btn-primary" ng-click="tyhjenna()">Äiti: tyhjennä</button>
+					<button type="button" class="btn btn-primary" ng-click="muokkaa()">Äiti: muokkaa</button>
+				</p>
 				<watch-child-3 tuotteet="tuotteet"></watch-child-3>
 			</div>
 		</div>
@@ -199,28 +281,61 @@ angular.module('watchNyanssit')
 				<div title="controller.js" name="controller.js" bs-pane>
 					<div hljs no-escape>
 angular.module('watchNyanssit')
-.controller('WatchParentController', function($scope) {
+.controller('WatchParentController3', function($scope, $filter) {
   $scope.tuotteet = [{id: 5}, {id: 34}, {id: 88}];
+
+  $scope.message = null;
+  $scope.$watchCollection('tuotteet', function() {
+  	$scope.message = 'Äiti huomasi tuotteiden päivittyneen: ' + $filter('json')($scope.tuotteet);
+  });
+
   $scope.counter = 500;
   $scope.lisaaTuote = function() {
+  	$scope.message = null;
   	$scope.tuotteet.push({id: $scope.counter++});
   };
+  $scope.tyhjenna = function() {
+  	$scope.message = null;
+  	$scope.tuotteet.length = 0;
+  };
+  $scope.muokkaa = function() {
+  	if($scope.tuotteet.length > 0) {
+  	  var tuote = $scope.tuotteet[$scope.tuotteet.length-1];
+  	  tuote.id += 150;
+  	}
+  };
 })
-.controller('WatchChildController2', function($scope, $filter) {
+.controller('WatchChildController3', function($scope, $filter) {
   $scope.message = null;
-  $scope.$watch('tuotteet', function() {
+  $scope.$watchCollection('tuotteet', function() {
   	$scope.message = 'Lapsi huomasi tuotteiden päivittyneen: ' + $filter('json')($scope.tuotteet);
-  }, true);
+  });
+
+  $scope.counter = 600;
+  $scope.lisaaTuote = function() {
+  	$scope.message = null;
+  	$scope.tuotteet.push({id: $scope.counter++});
+  };
+  $scope.tyhjenna = function() {
+  	$scope.message = null;
+  	$scope.tuotteet.length = 0;
+  };
+  $scope.muokkaa = function() {
+  	if($scope.tuotteet.length > 0) {
+  	  var tuote = $scope.tuotteet[$scope.tuotteet.length-1];
+  	  tuote.id += 150;
+  	}
+  };
 });
 					</div>
 				</div>
 				<div title="directive.js" name="directive.js" bs-pane>
 					<div hljs no-escape>
 angular.module('watchNyanssit')
-.directive('watchChild2', function() {
+.directive('watchChild3', function() {
   return {
     templateUrl: 'templates/watchNyanssit/watchChild.html',
-    controller: 'WatchChildController2',
+    controller: 'WatchChildController3',
     scope: {
       tuotteet: '='
     }
@@ -230,14 +345,16 @@ angular.module('watchNyanssit')
 				</div>
 				<div title="parent.html" name="parent.html" bs-pane>
 					<div hljs>
-<div ng-controller="WatchParentController">
-  <p>
-    {{ tuotteet | json }}
-  </p>
+<div ng-controller="WatchParentController3">
+  <p>{{ tuotteet | json }}</p>
+  <div class="alert alert-info" ng-if="message">{{ message }}</div>
 
-  <button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää tuote</button>
-  <button type="button" class="btn btn-primary" ng-click="tuotteet = []">Äiti: tyhjennä tuotteet</button>
-  <watch-child-2 tuotteet="tuotteet"></watch-child-2>
+  <p>
+    <button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Äiti: lisää</button>
+    <button type="button" class="btn btn-primary" ng-click="tyhjenna()">Äiti: tyhjennä</button>
+    <button type="button" class="btn btn-primary" ng-click="muokkaa()">Äiti: muokkaa</button>
+  </p>
+  <watch-child-3 tuotteet="tuotteet"></watch-child-3>
 </div>
 					</div>
 				</div>
@@ -245,6 +362,9 @@ angular.module('watchNyanssit')
 					<div hljs>
 <div>
   <div class="alert alert-info" ng-if="message">{{ message }}</div>
+  <button type="button" class="btn btn-primary" ng-click="lisaaTuote()">Lapsi: lisää</button>
+  <button type="button" class="btn btn-primary" ng-click="tyhjenna()">Lapsi: tyhjennä</button>
+  <button type="button" class="btn btn-primary" ng-click="muokkaa()">Lapsi: muokkaa</button>
 </div>
 					</div>
 				</div>
