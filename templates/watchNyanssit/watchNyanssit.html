@@ -133,7 +133,7 @@ angular.module('watchNyanssit')
 
 	<p ng-hide="showDoc2"><a href="" ng-click="showDoc2 = true">Näytä perustelu</a></p>
 	<p ng-show="showDoc2">
-		Tuotteiden lisäys havaitaan <code>$scope.$watch</code>:lla koska sille on annettu kolmas parametri <code>objectEquality</code> jolloin muutokset tarkastetaan vertaamalla Arrayn jokaisen olion kaikkia kenttiä. Tämä on erittäin raskasta koska tarkastus tehdään jokaisen scopen muutoksen yhteydessä (esim. textareaan on isätty yksi kirjain).
+		Tuotteiden lisäys havaitaan <code>$scope.$watch</code>:lla koska sille on annettu kolmas parametri <code>objectEquality</code> jolloin muutokset tarkastetaan vertaamalla Arrayn jokaisen olion kaikkia kenttiä <code>angular.equals()</code> metodilla. Tämä on erittäin raskasta koska tarkastus tehdään jokaisen scopen muutoksen yhteydessä (esim. textareaan on lisätty yksi kirjain).
 	</p>
 
 	<div class="row">
@@ -258,7 +258,7 @@ angular.module('watchNyanssit')
 
 	<p ng-hide="showDoc3"><a href="" ng-click="showDoc3 = true">Näytä perustelu</a></p>
 	<p ng-show="showDoc3">
-		Tuotteiden lisäys ja poisto havaitaan <code>$scope.$watchCollection</code>:lla koska se tutkii olioiden määrää ja vertailee niiden yhtäsuuruutta nopealla <code>===</code> vertailulla. Olion sisäisiä muokkauksia ei havaita. Myös kahden samanlaisen olion vertailu epäonnistuu jos kyseessä on eli instanssi eli <code>{id:1} !== {id:1}</code>
+		Tuotteiden lisäys ja poisto havaitaan <code>$scope.$watchCollection</code>:lla koska se tutkii olioiden määrää ja vertailee niiden yhtäsuuruutta nopealla <code>===</code> vertailulla. Olion sisäisiä muokkauksia ei havaita. Myös kahden samanlaisen olion vertailu epäonnistuu jos kyseessä on eri instanssi eli <code>{id:1} !== {id:1}</code>
 	</p>
 
 	<div class="row">

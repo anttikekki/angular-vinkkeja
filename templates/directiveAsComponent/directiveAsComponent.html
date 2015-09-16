@@ -1,7 +1,7 @@
 <div ng-controller="DirectiveAsComponentController">
 	<h1>Directive as component</h1>
 
-	<p>Vähänkään laajemmassa ohjelmassa lomakkeet on pakko pilkkoa pienempiin osiin jotta controllerit ja templatet eibät kasva liian suuriksi. Oletustapa tehdä tämä on siirtää osa logiikasta ala-controllereihin ja ala-templateihin ja liittää ne mukaan <code>ng-include</code> directiivillä. Tässä tavassa on uitenkin ongelmia.</p>
+	<p>Vähänkään laajemmassa ohjelmassa lomakkeet on pakko pilkkoa pienempiin osiin jotta controllerit ja templatet eivät kasva liian suuriksi. Oletustapa tehdä tämä on siirtää osa logiikasta ala-controllereihin ja ala-templateihin ja liittää ne mukaan <code>ng-include</code> directiivillä. Tässä tavassa on kuitenkin ongelmia.</p>
 
 
 
@@ -9,7 +9,7 @@
 
 	<p ng-hide="showDoc1"><a href="" ng-click="showDoc1 = true">Näytä perustelu</a></p>
 	<ul ng-show="showDoc1">
-		<li>Ala-scope käyttää suoraan ylä-scopen muuttujaa <code>$scope.order</code> ja muokkaa sen tilaa. Ala-controlleria lukemalla ei saa selville miten se muuttuja alustetaan tai mitään siihen liittyjää logiikkaa.</li>
+		<li>Ala-scope käyttää suoraan ylä-scopen muuttujaa <code>$scope.order</code> ja muokkaa sen tilaa. Ala-controlleria lukemalla ei saa selville miten se muuttuja alustetaan tai mitään siihen liittyvää logiikkaa.</li>
 		<li>Ala-scope muokkaa ylä-scopen muuttujan tilaa ilman että tätä mitenkään näkee ylä-controllerista.</li>
 		<li>Ala-scope käyttää ylä-scopen yleistä tallennusmetodia ilman että tätä mitenkään näkee ylä-controllerista.</li>
 	</ul>
@@ -121,7 +121,7 @@ angular.module('directiveAsComponent')
 
 	<p ng-hide="showDoc2"><a href="" ng-click="showDoc2 = true">Näytä perustelu</a></p>
 	<p ng-show="showDoc2">
-		Tilanteen pelastaa ala-controllerin liittämisen muuttaminen <code>ng-include</code> -> directive. Ala-controllerin rooli yksinkertaistuu vain <code>products</code> taulukon näyttämiseen ja muokkaukseen, se ei näy muuta tietoa ylä-scopesta eikä pysty kutsumaan sen palveluita. Ylä-controllerin templatesta näkyy nyt myös suoraan että <code>order-products</code> directiiville annetaan tietty data kaksisuuntaisella bindingilla eli directiivi saa muokata sen sisältöä.
+		Tilanteen pelastaa ala-controllerin liittämisen muuttaminen <code>ng-include</code> -> directive. Ala-controllerin rooli yksinkertaistuu vain <code>products</code> taulukon näyttämiseen ja muokkaukseen, se ei näe muuta tietoa ylä-scopesta eikä pysty kutsumaan sen palveluita. Ylä-controllerin templatesta näkyy nyt myös suoraan että <code>order-products</code> directiiville annetaan tietty data kaksisuuntaisella bindingilla eli directiivi saa muokata sen sisältöä.
 	</p>
 
 	<div class="row">
