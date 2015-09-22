@@ -3,7 +3,7 @@
 
 	<p>Vanha ja alkuperäinen tapa kommunikoida templaten ja controllerin välillä on scope. Vain scopen muuttujat ja metodit näkyivät templatelle. AngularJS 1.2 lähtien myös controlleria voi käyttää scopenn tapaan käyttämällä <code>controller as ctrl</code> syntaksia eli esim. <code>UserController as userCtrl</code>.</p>
 
-	<p>Toimintojen sekakayttö on teknisesti mahdollista mutta ilman projektinlaajuisia yhteisiä linjoja johtaa sekavaan tilanteeseen jossa koodarin mielen mukaan osa logiikasta on controllerissa ja osa scopessa. Pitää valita!</p>
+	<p>Toimintojen sekakayttö on teknisesti mahdollista mutta ilman projektinlaajuisia yhteisiä linjoja johtaa sekavaan tilanteeseen jossa koodarin mielen mukaan osa logiikasta on controllerissa ja osa scopessa. Kannattaa valita jompi kumpi tapa!</p>
 
 	<h2>Scope</h2>
 
@@ -46,7 +46,7 @@
 		<div class="col-md-8">
 			<div bs-tabs>
 				<div title="controller.js" name="controller.js" bs-pane>
-					<div hljs no-escape compile="true">
+					<div hljs no-escape>
 angular.module('scopeVsController').controller('ScopeController', function($scope) {
   $scope.clickCount = 0;
   $scope.message  = '';
@@ -65,7 +65,7 @@ angular.module('scopeVsController').controller('ScopeController', function($scop
 					</div>
 				</div>
 				<div title="template.html" name="template.html" bs-pane>
-					<div hljs compile="true">
+					<div hljs>
 <div ng-controller="ScopeController">
   <div class="alert" ng-class="{'alert-warning': clickCount < 5, 'alert-success': clickCount >= 5 }" role="alert">{{ message }}</div>
 
@@ -126,7 +126,7 @@ angular.module('scopeVsController').controller('ScopeController', function($scop
 		<div class="col-md-8">
 			<div bs-tabs>
 				<div title="controller.js" name="controller.js" bs-pane>
-					<div hljs no-escape compile="true">
+					<div hljs no-escape>
 angular.module('scopeVsController').controller('ControllerController', function($scope) {
   var controller = this;
   controller.clickCount = 0;
@@ -146,7 +146,7 @@ angular.module('scopeVsController').controller('ControllerController', function(
 					</div>
 				</div>
 				<div title="template.html" name="template.html" bs-pane>
-					<div hljs compile="true">
+					<div hljs>
 <div ng-controller="ControllerController as ctrl">
   <div class="alert" ng-class="{'alert-warning': ctrl.clickCount < 5, 'alert-success': ctrl.clickCount >= 5 }" role="alert">{{ ctrl.message }}</div>
 
@@ -155,6 +155,112 @@ angular.module('scopeVsController').controller('ControllerController', function(
       Klikkaa! <span class="badge">{{ ctrl.clickCount }}</span>
     </button>
   </p>
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+	<h2>Pidä templatelle näkyvä scope/controller siistinä</h2>
+
+	<div class="row">
+		<div class="col-md-12">
+			<p>Templatelle näkyvään scopeen/controlleriin kannattaa aina sijoittaa vain ne toiminnot joita templatella käytetään. Kaikki controllerin sisäiset toiminnot ja muuttujat kannattaa pitää tästä erillisinä. Tämä helpottaa koodin ymmärtämistä ja tekee refactoroinnista hempompaa.</p>
+
+			<p>Samalla kannattaa myös alkaa käyttämään luettavuuden vuoksi "contruktoria" josta saa heti mitä alustuksessa tehdään.</p>
+		</div>
+	</div>
+
+	<h3>Demo</h3>
+
+	<div class="row">
+		<div class="col-md-4">
+			<div ng-controller="SiistiScopeController">
+				<div ng-repeat="user in users">{{ user.name }}: {{ getUserOrderCount(user.id) }} tilausta</div>
+			</div>
+		</div>
+
+		<div class="col-md-8">
+			<div bs-tabs>
+				<div title="controller.js" name="controller.js" bs-pane>
+					<div hljs no-escape>
+angular.module('scopeVsController').controller('SiistiScopeController', function($scope, usersService, ordersService) {
+  var controller = this;
+  controller.ordersForUserIdMap = {};
+
+  $scope.users = [];
+
+  controller.init = function() {
+    usersService.loadUsers().then(function(users) {
+      $scope.users = users;
+    });
+
+    ordersService.loadOrders().then(function(orders) {
+      controller.createUserOrdersMap(orders);
+    });
+  };
+
+  controller.createUserOrdersMap = function(orders) {
+    orders.forEach(function(order) {
+      if(controller.ordersForUserIdMap[order.userId]) {
+        controller.ordersForUserIdMap[order.userId].push(order);
+      }
+      else {
+        controller.ordersForUserIdMap[order.userId] = [order];
+      }
+    });
+  };
+
+  $scope.getUserOrderCount = function(userId) {
+    return controller.ordersForUserIdMap[userId] ? controller.ordersForUserIdMap[userId].length : 0;
+  };
+
+  controller.init();
+});
+					</div>
+				</div>
+				<div title="service.js" name="service.js" bs-pane>
+					<div hljs no-escape>
+angular.module('scopeVsController')..service('usersService', function($q, $timeout) {
+  this.loadUsers = function() {
+    var deferred = $q.defer();
+
+    $timeout(function() {
+      deferred.resolve([
+          {id:1, name: 'Matti'}, 
+          {id:2, name: 'Maija'}, 
+          {id:3, name: 'Mikko'}]);
+    }, 300);
+
+    return deferred.promise;
+  };
+})
+.service('ordersService', function($q, $timeout) {
+  this.loadOrders = function() {
+    var deferred = $q.defer();
+
+      $timeout(function() {
+        deferred.resolve([
+          {id:100, userId: 1}, 
+          {id:101, userId: 1}, 
+          {id:102, userId: 1}, 
+          {id:103, userId: 2}, 
+          {id:104, userId: 2}]);
+      }, 300);
+
+      return deferred.promise;
+  };
+});
+					</div>
+				</div>
+				<div title="template.html" name="template.html" bs-pane>
+					<div hljs>
+<div ng-controller="SiistiScopeController">
+  <div ng-repeat="user in users">{{ user.name }}: {{ getUserOrderCount(user.id) }} tilausta</div>
 </div>
 					</div>
 				</div>
