@@ -3,13 +3,27 @@
 
 	<p>Normaaleilla formipohjaisilla näytöillä lähes millä tahansa koodaustyylillä suorituskyvystä ei tule ongelmia. Listoissa ja puissa, joissa on paljon toistuvia elementteja, on tilanne jo toinen. Yllättävän pienilläkin "virheillä" saa modernin selaimen modernilla koneella aivan kyykkyyn.</p>
 
+  <p>Yleisiä suorituskykyohjeita:
+    <ol>
+      <li>Älä looppaa turhaan, käytä aina mappia jos dataa pitää etsiä yli x1 kertaa: <code>map[key] = value</code></li>
+      <li>Pidä $scopessa vain ne muuttujat joita tarvitaan templatella. Muut ulos scopesta. Liia iso scope hidastaa muutosten havaitsemista.</li>
+      <li>Älä bindaa templaten arvoa funktion tulokseen</li>
+      <li>Käytä templaten oman sisältäviä directivejä harkiten <code>ng-repeat</code>:n sisällä</li>
+    </ol>
+  </p>
+
 
 
 	<h3>Älä bindaa templaten arvoa funktion tulokseen</h3>
 
 	<p>Bindattu funktio suoritetaan JOKAISEN muokkauksen jälkeen, esim. kaikissa ng-click ja ng-model muutoksissa.</p>
 
-	<div class="row">
+  <p>
+    <button type="button" class="btn btn-primary" ng-hide="showDemo1" ng-click="showDemo1 = true">Näytä hidas demo (lataus kestää)</button>
+    <button type="button" class="btn btn-primary" ng-show="showDemo1" ng-click="showDemo1 = false">Piilota demo</button>
+  </p>
+
+	<div class="row" ng-if="showDemo1">
 		<div class="col-md-4">
 			<div ng-controller="SuorituskykyController1">
 				<p><label>Hae asiakkaan nimellä</label> <input type="text" ng-model="hakusana"/></p>
@@ -74,6 +88,76 @@ angular.module('suorituskyky')
 				</div>
 			</div>
 		</div>
+  </div>
+
+  <p>
+    <button type="button" class="btn btn-primary" ng-hide="showDemo2" ng-click="showDemo2 = true">Näytä nopea demo (lataus kestää)</button>
+    <button type="button" class="btn btn-primary" ng-show="showDemo2" ng-click="showDemo2 = false">Piilota demo</button>
+  </p>
+
+  <div class="row" ng-if="showDemo2">
+    <div class="col-md-4">
+      <div ng-controller="SuorituskykyController2">
+        <p><label>Hae asiakkaan nimellä</label> <input type="text" ng-model="hakusana"/></p>
+        <div ng-repeat="customer in customers | filter:{name: hakusana}">{{ customer.name }} (tilausten arvo {{ orderValueForCustomerIdMap[customer.id] }} €)</div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div bs-tabs>
+        <div title="controller.js" name="controller.js" bs-pane>
+          <div hljs no-escape>
+angular.module('suorituskyky')
+.controller('SuorituskykyController2', function($scope) {
+  var controller = this;
+  $scope.customers = [];
+  $scope.orders = [];
+  $scope.orderValueForCustomerIdMap = {};
+
+  var count = 1;
+  while(count &lt; 50) {
+    var orderCount = 1;
+    while(orderCount &lt; 5000) {
+      $scope.orders.push({
+        customerId: count,
+        value: orderCount * count
+      });
+      orderCount++;
+    }
+
+    $scope.customers.push({
+      id: count,
+      name: 'Asiakas '+count
+    });
+    count++;
+  }
+
+  controller.countOrderValues = function() {
+    $scope.customers.forEach(function(customer) {
+      var orderValue = 0;
+      $scope.orders
+      .filter(function(o) { return o.customerId === customer.id})
+      .forEach(function(o) { orderValue += o.value });
+
+      $scope.orderValueForCustomerIdMap[customer.id] = orderValue;
+    });
+  };
+  controller.countOrderValues();
+
+});
+          </div>
+        </div>
+        <div title="template.html" name="template.html" bs-pane>
+          <div hljs>
+<div ng-controller="SuorituskykyController2">
+  <p><label>Hae asiakkaan nimellä</label> <input type="text" ng-model="hakusana"/></p>
+  <div ng-repeat="customer in customers | filter:{name: hakusana}">{{ customer.name }} (tilausten arvo {{ orderValueForCustomerIdMap[customer.id] }} €)</div>
+</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
 	</div>
 
 
